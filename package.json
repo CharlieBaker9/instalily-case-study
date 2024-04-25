@@ -11,11 +11,14 @@
     "antd": "^5.12.1",
     "chrome": "^0.1.0",
     "date-fns": "^2.30.0",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
     "framer-motion": "^10.16.4",
     "fs": "^0.0.1-security",
     "langchain": "^0.0.143",
     "marked": "^9.1.2",
     "mui": "^0.0.1",
+    "openai": "^4.38.5",
     "pdf-parse": "^1.1.1",
     "react": "^18.2.0",
     "react-chat-elements": "^12.0.10",
@@ -32,6 +35,7 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
+  "proxy": "http://localhost:3001",
   "eslintConfig": {
     "extends": [
       "react-app",

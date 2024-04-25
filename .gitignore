@@ -1,0 +1,14 @@
+# Dependency directories
+node_modules/
+
+# Environment variables
+.env
+
+# Build output
+/build
+
+# Misc
+.DS_Store
+*.log
+npm-debug.log*
+package-lock.json

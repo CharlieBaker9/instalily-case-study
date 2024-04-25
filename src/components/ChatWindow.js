@@ -24,13 +24,16 @@ function ChatWindow() {
   }, [messages]);
 
   const handleSend = async (input) => {
-    if (input.trim() !== "") {
+    console.log(input);
+    const trimmedInput = String(input).trim();
+    if (trimmedInput !== "") {
       // Set user message
       setMessages(prevMessages => [...prevMessages, { role: "user", content: input }]);
       setInput("");
 
       // Call API & set assistant message
       const newMessage = await getAIMessage(input);
+      console.log(typeof(newMessage.content));
       setMessages(prevMessages => [...prevMessages, newMessage]);
     }
   };
@@ -41,7 +44,8 @@ function ChatWindow() {
               <div key={index} className={`${message.role}-message-container`}>
                   {message.content && (
                       <div className={`message ${message.role}-message`}>
-                          <div dangerouslySetInnerHTML={{__html: marked(message.content).replace(/<p>|<\/p>/g, "")}}></div>
+                          <div dangerouslySetInnerHTML={{ __html: marked(message.content) }}></div>
+                          {/* <div dangerouslySetInnerHTML={{__html: marked(message.content).replace(/<p>|<\/p>/g, "")}}></div> */}
                       </div>
                   )}
               </div>
