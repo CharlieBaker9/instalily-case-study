@@ -18,7 +18,7 @@ app.post('/get-message', async (req, res) => {
         {"role": "user", "content": userQuery}
       ],
     });
-    res.json(response.data);
+    res.json(response);
   } catch (error) {
     console.error(error);
     res.status(500).send('An error occurred');

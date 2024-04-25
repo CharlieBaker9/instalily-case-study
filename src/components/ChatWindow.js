@@ -33,7 +33,6 @@ function ChatWindow() {
 
       // Call API & set assistant message
       const newMessage = await getAIMessage(input);
-      console.log(typeof(newMessage.content));
       setMessages(prevMessages => [...prevMessages, newMessage]);
     }
   };
@@ -44,8 +43,8 @@ function ChatWindow() {
               <div key={index} className={`${message.role}-message-container`}>
                   {message.content && (
                       <div className={`message ${message.role}-message`}>
-                          <div dangerouslySetInnerHTML={{ __html: marked(message.content) }}></div>
-                          {/* <div dangerouslySetInnerHTML={{__html: marked(message.content).replace(/<p>|<\/p>/g, "")}}></div> */}
+                          {/* <div dangerouslySetInnerHTML={{ __html: marked(message.content) }}></div> */}
+                          <div dangerouslySetInnerHTML={{__html: marked(message.content).replace(/<p>|<\/p>/g, "")}}></div>
                       </div>
                   )}
               </div>
@@ -56,7 +55,7 @@ function ChatWindow() {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Type a message..."
-              onKeyPress={(e) => {
+              onKeyDown={(e) => {
                 if (e.key === "Enter" && !e.shiftKey) {
                   handleSend(input);
                   e.preventDefault();
@@ -64,7 +63,7 @@ function ChatWindow() {
               }}
               rows="3"
             />
-            <button className="send-button" onClick={handleSend}>
+            <button className="send-button" onClick={() => handleSend(input)}>
               Send
             </button>
           </div>
