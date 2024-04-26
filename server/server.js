@@ -11,6 +11,7 @@ const openai = new OpenAI({
 app.post('/get-message', async (req, res) => {
   try {
     const userQuery = req.body.query;
+    const systemMessage = req.body.systemMessage;
     const response = await openai.chat.completions.create({
       model: "gpt-3.5-turbo",
       messages: [
@@ -42,9 +43,25 @@ app.post('/get-model-details', async (req, res) => {
   }
 });
 
+app.post('/get-part-details', async (req, res) => {
+  const partUrl = req.body.partUrl;
+  const baseUrl = 'https://www.partselect.com';
+  const fullUrl = baseUrl + partUrl;
+
+  try {
+    const response = await fetch(fullUrl);
+    if (!response.ok) {
+      throw new Error('Failed to fetch data');
+    }
+    const data = await response.text(); // Get raw HTML since no parsing to JSON is done
+    res.send(data); // Send raw HTML back to client
+  } catch (error) {
+    console.error('Error fetching part details:', error);
+    res.status(500).send('Failed to retrieve part details');
+  }
+});
+
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
   console.log(`Server listening on port ${PORT}`);
 });
-
-const systemMessage = `You are now operating as a chat agent designed for the PartSelect e-commerce website, specializing in refrigerator and dishwasher parts. Your primary function is to provide detailed product information and assist with customer transactions specifically related to these appliance parts. It is essential that you maintain focus on this specific use case and avoid addressing queries that fall outside the scope of refrigerator and dishwasher issues. Your responses should prioritize accuracy, relevance, and user experience, ensuring they are tailored to assist customers efficiently while considering the system's extensibility for future updates or expansions in product categories.`;
