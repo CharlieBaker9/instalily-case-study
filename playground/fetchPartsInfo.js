@@ -106,6 +106,8 @@ const partUrl2 = '/PS11753384-Whirlpool-WPW10348409-Screw.htm?SourceCode=19&Sear
 const partUrl3 = '/PS11745970-Whirlpool-WP841180A-Tray.htm?SourceCode=19&SearchTerm=PARB1905CB0&ModelNum=PARB1905CB0';
 
 // Call the function when the script is run
+fetchPartsInfo(partUrl);
+fetchPartsInfo(partUrl2);
 fetchPartsInfo(partUrl3);
 
 module.exports = fetchPartsInfo; // Export the function if using it in different parts of your project      
