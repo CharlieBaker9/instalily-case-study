@@ -2,21 +2,20 @@ const axios = require('axios');
 const cheerio = require('cheerio');
 
 function parseHtmlToJSON($) {
-  console.log($.html().slice(0, 10000));
-  //Extracting Manufacturer Part Number
-  const text = $('div:contains("PartSelect Number")').next().text().trim();
-  const match = text.match(/Manufacturer Part Number\s*([^\n]+)/);
+  //Extracting Part Select and Manufacturer Numbers
+  const text = $('div:contains("PartSelect Number")').text();
+  const match1 = text.match(/PartSelect Number\s*([^\n]*)/i); // Adjust regex according to actual text format
+  const match2 = text.match(/Manufacturer Part Number\s*([^\n]+)/);
 
   // Extract product information
   const productInfo = {
     name: $('h1[itemprop="name"]').text().trim().replace(/\s+[A-Z0-9]+$/, ''),  // Removes last part (model number)
-    partSelectNumber: $('div:contains("PartSelect Number")').next().text().trim(),
-    manufacturerPartNumber: match ? match[1].trim() : '',
+    partSelectNumber: match1 ? match1[1].trim() : '',
+    manufacturerPartNumber: match2 ? match2[1].trim() : '',
     brand: $('span[itemprop="brand"] > span[itemprop="name"]').text().trim(),
     price: $('span[itemprop="price"]').text().replace(/\s+/g, '').trim(),
     availability: $('span[itemprop="availability"]').attr('content').trim()
   };
-  // console.log(productInfo);
 
   // Extract troubleshooting, customer reviews, questions and answers, and model cross-reference
   const troubleshooting = $('#Troubleshooting').next().text().replace(/\s+/g, ' ').trim();
@@ -45,6 +44,7 @@ async function fetchPartsInfo(url) {
     const $ = cheerio.load(html);
 
     const content = parseHtmlToJSON($);
+    console.log(content);
     return content;
   } catch (error) {
     console.error('Error fetching or parsing data:', error);
@@ -106,6 +106,6 @@ const partUrl2 = '/PS11753384-Whirlpool-WPW10348409-Screw.htm?SourceCode=19&Sear
 const partUrl3 = '/PS11745970-Whirlpool-WP841180A-Tray.htm?SourceCode=19&SearchTerm=PARB1905CB0&ModelNum=PARB1905CB0';
 
 // Call the function when the script is run
-fetchPartsInfo(partUrl2);
+fetchPartsInfo(partUrl3);
 
 module.exports = fetchPartsInfo; // Export the function if using it in different parts of your project      
