@@ -10,3 +10,15 @@ export const getAIMessage = async (userInput) => {
     return { role: "assistant", content: "Sorry, I'm having trouble understanding you right now." };
   }
 };
+
+export const getModelDetails = async (userInput) => {
+  try {
+    const response = await axios.post('/get-model-details', { query: userInput });
+    console.log(response.data);
+    return { role: "assistant", content: response.data};
+  } catch (error) {
+    console.error("Error fetching AI message:", error);
+    // You can decide how to handle errors, maybe return a default message
+    return { role: "assistant", content: "Sorry, I'm having trouble understanding you right now." };
+  }
+};

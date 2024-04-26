@@ -25,6 +25,23 @@ app.post('/get-message', async (req, res) => {
   }
 });
 
+app.post('/get-model-details', async (req, res) => {
+  const modelNumber = req.body.modelNumber;
+  const apiUrl = `https://www.partselect.com/Models/${modelNumber}`; // Replace with the actual API URL
+
+  try {
+    const response = await fetch(apiUrl);
+    if (!response.ok) {
+      throw new Error('Failed to fetch data');
+    }
+    const data = await response.json();
+    res.json(data);
+  } catch (error) {
+    console.error('Error fetching model data:', error);
+    res.status(500).send('Failed to retrieve model details');
+  }
+});
+
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
   console.log(`Server listening on port ${PORT}`);
