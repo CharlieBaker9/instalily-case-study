@@ -1,4 +1,6 @@
-// Filename: fetchDataByModel.js
+const extractQuestionsAndAnswers = require('../src/parsingFunctions/extractQuestionsAndAnswers');
+const extractRepairStories = require('../src/parsingFunctions/extractRepairStories');
+const extractPartsByModel = require('../src/parsingFunctions/extractPartsByModel');
 const axios = require('axios');  
 const cheerio = require('cheerio');
 
@@ -7,31 +9,32 @@ const cheerio = require('cheerio');
  * @param {string} modelNumber The model number to fetch details for.
  * @returns {Promise<Object>} The API response containing the model details.
  */
-async function fetchPartsByModel(modelNumber) {
-  const url = `https://www.partselect.com/Models/${modelNumber}/#parts`;
+async function fetchModelInfo(modelNumber) {
+  const url = `https://www.partselect.com/Models/${modelNumber}`;
   try {
     const response = await axios.get(url);
     const html = response.data;
     const $ = cheerio.load(html);
+
+    //Extracting Part Select and Manufacturer Numbers
+    const title = $('title').text().trim();
+    const description = $('meta[name="description"]').attr('content').trim();
+  
+    // Extract troubleshooting, questions and answers, and model cross-referenc
+    const qaText = $('#QuestionsAndAnswers').next().text().trim(); 
+    const questionsAndAnswers = extractQuestionsAndAnswers(qaText);
+    const parts = extractPartsByModel($);
+    const symptomsText = $('#Symptoms').next().text().trim().replace(/\s+/g, ' ');
+    const repairStories = extractRepairStories($);
     
-    // Create an array to store the parsed data
-    const parts = [];
-
-    // Assuming each part is within a div with a class 'qna__question__related'
-    $('.qna__question__related').each((index, element) => {
-      const $element = $(element);
-      const partName = $element.find('a.d-block.bold.mb-2').text().trim();
-      const partNumber = $element.find('img').attr('title').match(/Part Number: (\w+)/)[1];
-      const price = $element.find('.price.bold').text().trim();
-      const imageUrl = $element.find('img').data('src');
-      const partUrl = $element.find('a.d-block').attr('href');
-
-      // Push the data to the parts array
-      parts.push({ partName, partNumber, price, imageUrl, partUrl });
-    });
-
-    console.log(parts);
-    return parts;
+    return {
+      title,
+      description,
+      questionsAndAnswers,
+      parts,
+      symptomsText,
+      repairStories
+    };
    
   } catch (error) {
     console.error('Error fetching data from PartSelect:', error);
@@ -42,6 +45,5 @@ async function fetchPartsByModel(modelNumber) {
 const modelNumber = 'WDT780SAEM1';
 
 // Call the function when the script is run
-fetchPartsByModel(modelNumber);
+fetchModelInfo(modelNumber);
 
-module.exports = fetchPartsByModel;  // This line allows the module to be required in other Node.js files if necessary

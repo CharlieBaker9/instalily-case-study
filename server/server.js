@@ -10,8 +10,6 @@ const openai = new OpenAI({
 
 app.post('/get-message', async (req, res) => {
   try {
-    const userQuery = req.body.query;
-    const systemMessage = req.body.systemMessage;
     let conversationHistory = req.body.conversationHistory;
     
     const response = await openai.chat.completions.create({

@@ -3,7 +3,8 @@ import "./ChatWindow.css";
 import { getAIMessage, getModelDetails, getPartDetails } from "../api/api";
 import analyzeAIResponseForAction from "../responseAnalysis/analyzeAIResponseForAction";
 import { marked } from "marked";
-import parsePartHtmlToJSON from "../parsingFunctions/parseHtmlToJSON";
+import parsePartHtmlToJSON from "../parsingFunctions/parsePartHtmlToJSON";
+import parseModelHtmlToJSON from "../parsingFunctions/parseModelHtmlToJson";
 
 function ChatWindow() {
   const initialDisplayMessage = [{
@@ -33,14 +34,18 @@ function ChatWindow() {
   useEffect(() => {
     const fetchAIResponse = async () => {
       if (lastUserMessage) {
+        const response = analyzeAIResponseForAction(allMessages);
+        
+
+        
         const aiResponse = await getAIMessage(allMessages);
-        const response = analyzeAIResponseForAction(aiResponse);
 
         let info = "";
         if (response.type !== 'none') {
-          const modelInfo = await getModelDetails(response.modelNumber);
+          const modelHtml = await getModelDetails(response.modelNumber);
+          const modelInfo = parseModelHtmlToJSON(modelHtml);
           info = `The following is information on the model that I asked about to help you answer my question: \n${JSON.stringify(modelInfo)}`;
-
+          console.log(info);
           if (response.type === "both"){
             const partHtml = await getPartDetails(response.partNumber);
             const partInfo = parsePartHtmlToJSON(partHtml);
@@ -55,7 +60,7 @@ function ChatWindow() {
     };
     fetchAIResponse();
     scrollToBottom();
-  }, [lastUserMessage]); // Depend on the lastUserMessage to trigger the effect
+  }); // Depend on the lastUserMessage to trigger the effect
 
   const handleSend = (input) => {
     const trimmedInput = String(input).trim();
