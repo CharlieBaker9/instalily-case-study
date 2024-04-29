@@ -5,6 +5,7 @@ const cheerio = require('cheerio');
 
 async function parseModelHtmlToJSON(html) {
   const $ = cheerio.load(html);
+  console.log(html);
 
   const title = $('title').text().trim();
   const description = $('meta[name="description"]').attr('content').trim();

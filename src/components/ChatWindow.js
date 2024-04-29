@@ -34,12 +34,7 @@ function ChatWindow() {
   useEffect(() => {
     const fetchAIResponse = async () => {
       if (lastUserMessage) {
-        const response = analyzeAIResponseForAction(allMessages);
-        
-
-        
-        const aiResponse = await getAIMessage(allMessages);
-
+        const response = await analyzeAIResponseForAction(allMessages);
         let info = "";
         if (response.type !== 'none') {
           const modelHtml = await getModelDetails(response.modelNumber);
@@ -52,8 +47,14 @@ function ChatWindow() {
             info += `\nThe following is information on the part that I asked about to help you answer my question: ${JSON.stringify(partInfo)}`;
           }
         }
+        if (info) {
+          setAllMessages(prevMessages => [...prevMessages, { role: "user", content: info }]);
+        }
+        
+        const aiResponse = await getAIMessage(allMessages);
 
-        setAllMessages(prevMessages => [...prevMessages, { role: "assistant", content: aiResponse.content }, { role: "user", content: info }]);
+
+        setAllMessages(prevMessages => [...prevMessages, { role: "assistant", content: aiResponse.content }]);
         setDisplayMessages(prevMessages => [...prevMessages, { role: "assistant", content: aiResponse.content }]);
         setLastUserMessage(null); // Reset the last user message processed
       }
