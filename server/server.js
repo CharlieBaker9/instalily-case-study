@@ -12,12 +12,11 @@ app.post('/get-message', async (req, res) => {
   try {
     const userQuery = req.body.query;
     const systemMessage = req.body.systemMessage;
+    let conversationHistory = req.body.conversationHistory;
+    
     const response = await openai.chat.completions.create({
       model: "gpt-3.5-turbo",
-      messages: [
-        {"role": "system", "content": systemMessage},
-        {"role": "user", "content": userQuery}
-      ],
+      messages: conversationHistory,
     });
     res.json(response);
   } catch (error) {

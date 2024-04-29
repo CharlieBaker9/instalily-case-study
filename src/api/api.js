@@ -1,27 +1,28 @@
 import axios from 'axios';
 
-export const getAIMessage = async (userInput) => {
+export const getAIMessage = async (conversationHistory) => {
   try {
-    const response = await axios.post('/get-message', { query: userInput, systemMessage: systemMessage});
+    const response = await axios.post('/get-message', { conversationHistory: conversationHistory});
     return { role: "assistant", content: response.data.choices[0].message.content};
   } catch (error) {
-    console.error("Error fetching AI message:", error);
-    // You can decide how to handle errors, maybe return a default message
-    return { role: "assistant", content: "Sorry, I'm having trouble understanding you right now." };
+    return { role: "assistant", content: "Error fetching AI messages" };
   }
 };
 
-export const getModelDetails = async (userInput) => {
+export const getModelDetails = async (modelNumber) => {
   try {
-    const response = await axios.post('/get-model-details', { query: userInput });
-    console.log(response.data);
-    return { role: "assistant", content: response.data};
+    const response = await axios.post('/get-model-details', { modelNumber: modelNumber });
+    return { content: response.data };
   } catch (error) {
-    console.error("Error fetching AI message:", error);
-    // You can decide how to handle errors, maybe return a default message
-    return { role: "assistant", content: "Sorry, I'm having trouble understanding you right now." };
+    return { content: "Error fetching model details" };
   }
 };
 
-
-const systemMessage = `You are now operating as a chat agent designed for the PartSelect e-commerce website, specializing in refrigerator and dishwasher parts. Your primary function is to provide detailed product information and assist with customer transactions specifically related to these appliance parts. It is essential that you maintain focus on this specific use case and avoid addressing queries that fall outside the scope of refrigerator and dishwasher issues. Your responses should prioritize accuracy, relevance, and user experience, ensuring they are tailored to assist customers efficiently while considering the system's extensibility for future updates or expansions in product categories.`;
+export const getPartDetails = async (partUrl) => {
+  try {
+    const response = await axios.post('/get-part-details', { partUrl: partUrl });
+    return { content: response.data };
+  } catch (error) {
+    return { content: "Error fetching part details" };
+  }
+};

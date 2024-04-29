@@ -3,7 +3,7 @@ const { extractReviews } = require('./extractReviews');
 const { extractQuestionsAndAnswers } = require('./extractQuestionsAndAnswers');
 const { extractModelCrossReference } = require('./extractModelCrossReference');
 
-function parseHtmlToJSON(html) {
+function parsePartHtmlToJSON(html) {
   const $ = cheerio.load(html);
   //Extracting Part Select and Manufacturer Numbers
   const text = $('div:contains("PartSelect Number")').text();
@@ -37,4 +37,4 @@ function parseHtmlToJSON(html) {
   };
 }
 
-module.exports = parseHtmlToJSON; 
+module.exports = parsePartHtmlToJSON; 
