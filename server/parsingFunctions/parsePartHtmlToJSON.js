@@ -1,7 +1,8 @@
 const cheerio = require('cheerio');
-const { extractReviews } = require('./extractReviews');
-const { extractQuestionsAndAnswers } = require('./extractQuestionsAndAnswers');
-const { extractModelCrossReference } = require('./extractModelCrossReference');
+const extractReviews = require('../parsingFunctions/extractReviews');
+const extractQuestionsAndAnswers = require('../parsingFunctions/extractQuestionsAndAnswers');
+const extractModelCrossReference = require('../parsingFunctions/extractModelCrossReference');
+const extractRepairStories = require('../parsingFunctions/extractRepairStories');
 
 function parsePartHtmlToJSON(html) {
   const $ = cheerio.load(html);
@@ -27,13 +28,15 @@ function parsePartHtmlToJSON(html) {
   const qaText = $('#QuestionsAndAnswers').next().text().trim(); 
   const questionsAndAnswers = extractQuestionsAndAnswers(qaText)
   const modelCrossReference = extractModelCrossReference($, $('#ModelCrossReference').next());
+  const repairStories = extractRepairStories($);
 
   return {
     productInfo,
     troubleshooting,
     customerReviews,
     questionsAndAnswers,
-    modelCrossReference
+    modelCrossReference,
+    repairStories
   };
 }
 

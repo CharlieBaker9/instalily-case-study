@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import "./ChatWindow.css";
-import { getAIMessage, getModelDetails, getPartDetails } from "../api/api";
+import { getAIMessage, getModelDetails, getPartDetails, findPart } from "../api/api";
 import analyzeAIResponseForAction from "../responseAnalysis/analyzeAIResponseForAction";
 import { marked } from "marked";
 
@@ -21,7 +21,7 @@ function ChatWindow() {
   const [displayMessages, setDisplayMessages] = useState(initialDisplayMessage);
   const [allMessages, setAllMessages] = useState(initialMessages);
   const [input, setInput] = useState("");
-  const [lastUserMessage, setLastUserMessage] = useState(null); // Track the last user message processed
+  const [lastUserMessage, setLastUserMessage] = useState(null);
 
   const messagesEndRef = useRef(null);
 
@@ -29,28 +29,28 @@ function ChatWindow() {
     messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
   };
 
-  function findPartUrlByNumber(parts, partNumber) {
-    const part = parts.find(part => part.partNumber === partNumber);
-    return part ? part.partUrl : null;
-  }
-
   useEffect(() => {
     const fetchAIResponse = async () => {
       if (lastUserMessage) {
         const response = await analyzeAIResponseForAction(allMessages);
         let info = "";
- 
+        
         if (response.type !== 'none') {
           const modelData = await getModelDetails(response.modelNumber);
           const modelInfo = modelData.content;
           info = `The following is information on the model that I asked about to help you answer my question: \n${JSON.stringify(modelInfo)}`;
           
-          if (response.type === "both"){
-            const partUrl = findPartUrlByNumber(modelInfo.parts, "PS11752778");
-            const partData = await getPartDetails(partUrl);
+          if (response.type === "both" && response.partNumber != null){
+            const partData = await findPart(response.partNumber);
             const partInfo = partData.content;
-            info += `\nThe following is information on the part that I asked about to help you answer my question: ${JSON.stringify(partInfo)}`;
-          }
+
+            if (partInfo.length > 0) {
+              const partUrl = partInfo[0].partUrl;
+              const partData = await getPartDetails(partUrl);
+              const partDetails = partData.content;
+              info += `\nThe following is information on the part that I asked about to help you answer my question: ${JSON.stringify(partDetails)}`;
+            }
+            }
         }
         if (info) {
           setAllMessages(prevMessages => [...prevMessages, { role: "user", content: info }]);
@@ -108,15 +108,13 @@ function ChatWindow() {
   );
 }
 
-const sysMessage = `You are operating as a chat agent for the PartSelect e-commerce website, specializing in refrigerator and dishwasher parts. Your role is to provide detailed product information and assist with customer inquiries, focusing exclusively on these appliance parts. You must prioritize accuracy, relevance, and user experience in your responses.
+const sysMessage = `You’re a chatbot for PartSelect, your expertise lies in fridge and dishwasher parts. Your responses should be friendly, informative, and precise.
 
-For effective assistance, consider the following scenarios based on user input:
-1. If a user asks about a model but does not provide a model number, prompt the user to provide the model number. Ensure to restate the model number clearly in your response as "Model number: [number]".
-2. If a user provides a model number, use this information to fetch relevant details from the PartSelect website API to answer their query. Always confirm the model number in your response using the format "Model number: [number]".
-3. If a user asks about a part and provides a part number but not a model number, prompt them to provide the model number for compatibility and additional assistance. Include the part number in your response as "Part number: [number]" and ask for the model number explicitly.
-4. If a user mentions a part and provides the model number but not the part number, request the part number to provide specific information or compatibility details. Restate the model number and request the part number using the format "Part number: [number]".
-5. If a user provides both a model number and a part number in their query, use these details to offer comprehensive information about the compatibility and installation of the part. Confirm both details in your response by stating "Model number: [number]" and "Part number: [number]".
+- If the user hasn’t given a model number, gently ask for it with: "May I have the model number to assist you better?"
+- When you receive a model number, pull up specific information and reconfirm by saying, "Thanks! For model number: [number], here's what I found..."
+- If presented with a part number but no model number, ask for the latter kindly: "To ensure perfect compatibility, could you provide the model number too?"
+- If there’s a model number but no part number, inquire politely: "Could you also give me the part number for more detailed assistance?"
+- If given both numbers, provide comprehensive support, reaffirming with "For model number: [number] and part number: [number], here’s the complete info..."
 
-Always verify whether the user has provided necessary details such as a model number or a part number and guide them to furnish any missing information to ensure precise and helpful responses. This approach will aid in maintaining the focus on refrigerator and dishwasher issues and prepare the system for potential future expansions in product categories.`
-
+Remember to always clarify necessary details like model or part numbers to offer targeted help. Keep this approach friendly and informative, and stay adaptable for service expansions.`
 export default ChatWindow;
