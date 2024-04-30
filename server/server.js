@@ -1,8 +1,12 @@
 require('dotenv').config();
 const express = require('express');
+const fetch = require('node-fetch');
 const OpenAI = require('openai');
 const app = express();
 app.use(express.json());
+
+const parseModelHtmlToJSON = require('./parsingFunctions/parseModelHtmlToJson');
+const parsePartHtmlToJSON = require('./parsingFunctions/parsePartHtmlToJSON');
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY
@@ -32,8 +36,10 @@ app.post('/get-model-details', async (req, res) => {
     if (!response.ok) {
       throw new Error('Failed to fetch data');
     }
-    const data = await response.json();
-    res.json(data);
+    const html = await response.text();
+    const info = parseModelHtmlToJSON(html);
+    res.send(info);
+    
   } catch (error) {
     console.error('Error fetching model data:', error);
     res.status(500).send('Failed to retrieve model details');
@@ -42,16 +48,20 @@ app.post('/get-model-details', async (req, res) => {
 
 app.post('/get-part-details', async (req, res) => {
   const partUrl = req.body.partUrl;
+
   const baseUrl = 'https://www.partselect.com';
   const fullUrl = baseUrl + partUrl;
+  console.log(partUrl);
+  console.log(fullUrl);
 
   try {
     const response = await fetch(fullUrl);
     if (!response.ok) {
       throw new Error('Failed to fetch data');
     }
-    const data = await response.text(); // Get raw HTML since no parsing to JSON is done
-    res.send(data); // Send raw HTML back to client
+    const html = await response.text();
+    const info = parsePartHtmlToJSON(html);
+    res.send(info); 
   } catch (error) {
     console.error('Error fetching part details:', error);
     res.status(500).send('Failed to retrieve part details');

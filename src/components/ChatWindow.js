@@ -3,8 +3,6 @@ import "./ChatWindow.css";
 import { getAIMessage, getModelDetails, getPartDetails } from "../api/api";
 import analyzeAIResponseForAction from "../responseAnalysis/analyzeAIResponseForAction";
 import { marked } from "marked";
-import parsePartHtmlToJSON from "../parsingFunctions/parsePartHtmlToJSON";
-import parseModelHtmlToJSON from "../parsingFunctions/parseModelHtmlToJson";
 
 function ChatWindow() {
   const initialDisplayMessage = [{
@@ -31,37 +29,42 @@ function ChatWindow() {
     messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
   };
 
+  function findPartUrlByNumber(parts, partNumber) {
+    const part = parts.find(part => part.partNumber === partNumber);
+    return part ? part.partUrl : null;
+  }
+
   useEffect(() => {
     const fetchAIResponse = async () => {
       if (lastUserMessage) {
         const response = await analyzeAIResponseForAction(allMessages);
         let info = "";
+ 
         if (response.type !== 'none') {
-          const modelHtml = await getModelDetails(response.modelNumber);
-          const modelInfo = parseModelHtmlToJSON(modelHtml);
+          const modelData = await getModelDetails(response.modelNumber);
+          const modelInfo = modelData.content;
           info = `The following is information on the model that I asked about to help you answer my question: \n${JSON.stringify(modelInfo)}`;
-          console.log(info);
+          
           if (response.type === "both"){
-            const partHtml = await getPartDetails(response.partNumber);
-            const partInfo = parsePartHtmlToJSON(partHtml);
+            const partUrl = findPartUrlByNumber(modelInfo.parts, "PS11752778");
+            const partData = await getPartDetails(partUrl);
+            const partInfo = partData.content;
             info += `\nThe following is information on the part that I asked about to help you answer my question: ${JSON.stringify(partInfo)}`;
           }
         }
         if (info) {
           setAllMessages(prevMessages => [...prevMessages, { role: "user", content: info }]);
         }
-        
         const aiResponse = await getAIMessage(allMessages);
-
 
         setAllMessages(prevMessages => [...prevMessages, { role: "assistant", content: aiResponse.content }]);
         setDisplayMessages(prevMessages => [...prevMessages, { role: "assistant", content: aiResponse.content }]);
-        setLastUserMessage(null); // Reset the last user message processed
+        setLastUserMessage(null);
       }
     };
     fetchAIResponse();
     scrollToBottom();
-  }); // Depend on the lastUserMessage to trigger the effect
+  });
 
   const handleSend = (input) => {
     const trimmedInput = String(input).trim();
@@ -69,8 +72,8 @@ function ChatWindow() {
       const newUserMessage = { role: "user", content: trimmedInput };
       setAllMessages(prevMessages => [...prevMessages, newUserMessage]);
       setDisplayMessages(prevMessages => [...prevMessages, newUserMessage]);
-      setInput(""); // Clear input after sending
-      setLastUserMessage(newUserMessage); // Update the last user message
+      setInput(""); 
+      setLastUserMessage(newUserMessage);
     }
   };
 
@@ -81,7 +84,7 @@ function ChatWindow() {
           {typeof message.content === 'string' ? (
             <div dangerouslySetInnerHTML={{__html: marked(message.content).replace(/<p>|<\/p>/g, "")}} className={`message ${message.role}-message`}></div>
           ) : (
-            <div>{JSON.stringify(message.content)}</div>  // Fallback rendering
+            <div>{JSON.stringify(message.content)}</div> 
           )}
         </div>
       ))}
