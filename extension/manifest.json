@@ -1,6 +1,9 @@
 {
   "manifest_version": 3,
-  "name": "PartSelect ChatBot",
+  "name": "React Side Panel Extension",
   "version": "1.0",
-  "permissions": ["sidePanel"]
+  "permissions": ["sidePanel"],
+  "sidepanel": {
+    "default_panel": "build/index.html"
+  }
 }
