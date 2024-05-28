@@ -19,9 +19,9 @@ export const getModelDetails = async (modelNumber) => {
   }
 };
 
-export const findPart = async (partNumber) => {
+export const findPart = async (partNumber, modelNumber) => {
   try {
-    const response = await axios.post('/find-part', { partNumber: partNumber });
+    const response = await axios.post('/find-part', { partNumber: partNumber, modelNumber: modelNumber });
     return { content: response.data };
   } catch (error) {
     return { content: "Error fetching model details" };

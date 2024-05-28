@@ -17,7 +17,12 @@ const openai = new OpenAI({
 app.post('/get-message', async (req, res) => {
   try {
     let conversationHistory = req.body.conversationHistory;
-    
+
+    const maxMessages = 10;
+    if (conversationHistory.length > maxMessages) {
+      conversationHistory = conversationHistory.slice(-maxMessages);
+    }
+
     const response = await openai.chat.completions.create({
       model: "gpt-3.5-turbo",
       messages: conversationHistory,
@@ -50,7 +55,8 @@ app.post('/get-model-details', async (req, res) => {
 
 app.post('/find-part', async (req, res) => {
   const partNumber = req.body.partNumber;
-  const apiUrl = `https://www.partselect.com/Models/10640262010/Parts/?SearchTerm=${partNumber}`; // Replace with the actual API URL
+  const modelNumber = req.body.modelNumber;
+  const apiUrl = `https://www.partselect.com/Models/${modelNumber}/Parts/?SearchTerm=${partNumber}`; // Replace with the actual API URL
 
   try {
     const response = await fetch(apiUrl);

@@ -41,7 +41,7 @@ function ChatWindow() {
           info = `The following is information on the model that I asked about to help you answer my question: \n${JSON.stringify(modelInfo)}`;
           
           if (response.type === "both" && response.partNumber != null){
-            const partData = await findPart(response.partNumber);
+            const partData = await findPart(response.partNumber, response.modelNumber);
             const partInfo = partData.content;
 
             if (partInfo.length > 0) {
